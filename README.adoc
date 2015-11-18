@@ -1,0 +1,6 @@
+== Arquillian CUbe as Mock Container
+
+=== Premise
+
+A Docker Container communicates with 'some' external service.
+Could we intercept the remote call with another Docker Container under our control in a testing scenario?
