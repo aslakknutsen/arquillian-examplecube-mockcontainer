@@ -23,6 +23,6 @@ public class MockContainerTestCase {
         socket.close();
         
         System.out.println(response);
-        Assert.assertEquals("INTERCEPTED", response);
+        Assert.assertTrue(response.contains("INTERCEPTED"));
     }
 }
