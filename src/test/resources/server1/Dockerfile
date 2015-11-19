@@ -1,4 +1,6 @@
-FROM phusion/baseimage
+FROM centos:7
+
+RUN yum install -y nmap-ncat
 
 EXPOSE 8085
-CMD while true; do { curl -D - http://www.google.com/; } | nc -vv -l 0.0.0.0 8085; done 
+CMD nc -k -l 0.0.0.0 8085 -c 'curl -D - http://pastebin.com'

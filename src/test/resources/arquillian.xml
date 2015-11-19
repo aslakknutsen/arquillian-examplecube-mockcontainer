@@ -7,7 +7,7 @@
 
   <extension qualifier="docker">
     <property name="machineName">dev</property>
-    <property name="autoStartContainers">server1,server2</property>
+    <property name="autoStartContainers">mockserver,server1</property>
     <property name="dockerContainers">
         server1:
               buildImage:
@@ -16,13 +16,13 @@
                 remove: true
               portBindings: [8085/tcp]
               links:
-                - server2:www.google.com
-        server2:
+                - mockserver:pastebin.com
+        mockserver:
               buildImage:
-                dockerfileLocation: src/test/resources/server2
+                dockerfileLocation: src/test/resources/mockserver
                 noCache: false
                 remove: true
-              portBindings: [80/tcp]
+              portBindings: [1080->80/tcp]
     </property>
   </extension>
 
