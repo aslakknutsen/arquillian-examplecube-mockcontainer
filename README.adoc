@@ -5,3 +5,83 @@
 A Docker Container communicates with 'some' external service.
 
 Could we intercept the remote call with another Docker Container under our control in a testing scenario?
+
+=== Possible solution
+
+Use Docker linking to link a container under our control to the host name of the external service:
+
+[source, yaml]
+----
+server1:
+      buildImage:
+        dockerfileLocation: src/test/resources/server1
+        noCache: false
+        remove: true
+      portBindings: [8085/tcp]
+      links:
+        - mockserver:pastebin.com
+mockserver:
+      buildImage:
+        dockerfileLocation: src/test/resources/mockserver
+        noCache: false
+        remove: true
+      portBindings: [1080->80/tcp]
+----
+
+Use e.g. link:http://www.mock-server.com/[MockServer] as our controlled target which gives us control over the response directly from the test case:
+
+[source, java]
+----
+    @Before
+    public void setupMock() {
+        mock = new MockServerClient(hostIp, 1080);
+        mock
+        .when(
+                request()
+                    .withMethod("GET")
+        ).respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody("INTERCEPTED"));
+    }
+----
+
+Complete test case:
+
+[source, java]
+----
+@RunWith(Arquillian.class)
+public class MockContainerTestCase {
+
+    @HostIp
+    private String hostIp;
+
+    private MockServerClient mock;
+
+    @Before
+    public void setupMock() {
+        mock = new MockServerClient(hostIp, 1080);
+        mock
+        .when(
+                request()
+                    .withMethod("GET")
+        ).respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody("INTERCEPTED"));
+    }
+
+    @After
+    public void clear() {
+        mock.clear(null);
+    }
+    
+    @Test
+    public void shouldMockGoogleCom() throws Exception {
+        String response = IOUtil.asString(new URL("http", hostIp, 8085, "").openStream());
+
+        System.out.println(response);
+        Assert.assertTrue(response.contains("INTERCEPTED"));
+    }
+}
+----
